@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "650444345219",
+    "project_id": "parkir-app-b4809",
+    "storage_bucket": "parkir-app-b4809.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:650444345219:android:9649a9d2ede532c9f270b6",
+        "android_client_info": {
+          "package_name": "com.example.parkir_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCuBAFs3ev-TBXLLmCf7526tv9ELN_todY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:650444345219:android:a0a5c6f61cb3e964f270b6",
+        "android_client_info": {
+          "package_name": "com.example.parkir_web_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCuBAFs3ev-TBXLLmCf7526tv9ELN_todY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
