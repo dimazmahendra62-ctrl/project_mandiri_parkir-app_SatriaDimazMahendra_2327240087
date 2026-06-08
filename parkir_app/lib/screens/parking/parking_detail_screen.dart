@@ -45,10 +45,6 @@ class ParkingDetailScreen extends StatelessWidget {
                   Color(0xff1E40AF),
                 ],
               ),
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(30),
-                bottomRight: Radius.circular(30),
-              ),
             ),
             child: Column(
               children: [

@@ -1,34 +1,46 @@
 import 'package:flutter/material.dart';
+import '../theme/app_theme.dart';
 
 class CustomTextField extends StatelessWidget {
   final TextEditingController controller;
-  final String labelText;
-  final IconData icon;
+  final String hintText;
+  final IconData prefixIcon; // Menggunakan IconData agar sinkron dengan Icons.xxx
   final bool obscureText;
+  final TextInputType keyboardType;
 
   const CustomTextField({
     super.key,
     required this.controller,
-    required this.labelText,
-    required this.icon,
-    this.obscureText = false,
+    required this.hintText,
+    required this.prefixIcon,
+    this.obscureText = false, // Nilai default jika tidak diisi di login screen
+    this.keyboardType = TextInputType.text, // Nilai default jika tidak diisi
   });
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.grey[100],
+        borderRadius: BorderRadius.circular(12),
+      ),
       child: TextField(
         controller: controller,
         obscureText: obscureText,
+        keyboardType: keyboardType,
+        style: const TextStyle(
+          fontWeight: FontWeight.w600,
+          color: AppTheme.primary,
+        ),
         decoration: InputDecoration(
-          prefixIcon: Icon(icon, color: Colors.blueAccent),
-          labelText: labelText,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
+          hintText: hintText,
+          hintStyle: const TextStyle(
+            color: AppTheme.textSecondary, 
+            fontWeight: FontWeight.normal,
           ),
-          filled: true,
-          fillColor: Colors.grey[100],
+          prefixIcon: Icon(prefixIcon, color: AppTheme.accent), // Membungkus IconData dengan benar
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         ),
       ),
     );
