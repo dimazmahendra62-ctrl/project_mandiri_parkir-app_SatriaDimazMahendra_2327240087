@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:qr_flutter/qr_flutter.dart'; // Pustaka untuk QR Code asli
-import 'package:google_fonts/google_fonts.dart'; // Untuk tipografi premium
-import 'package:intl/intl.dart'; // Untuk format tanggal yang rapi
+import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
 class TicketScreen extends StatelessWidget {
   final String mallName;
@@ -17,187 +17,230 @@ class TicketScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Format tanggal saat ini (contoh: 07 Mei 2026)
-    String formattedDate = DateFormat('dd MMM yyyy').format(DateTime.now());
-    String formattedTime = DateFormat('HH:mm').format(DateTime.now());
+    final now = DateTime.now();
+
+    String date =
+        DateFormat('dd MMM yyyy').format(now);
+
+    String time =
+        DateFormat('HH:mm').format(now);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF0F4F8),
+      backgroundColor: const Color(0xFFF4F7FC),
+
       appBar: AppBar(
-        title: Text("E-Tiket Parkir", style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
-        backgroundColor: Colors.blueAccent,
-        foregroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
+        backgroundColor: Colors.transparent,
+        foregroundColor: Colors.black,
+        title: Text(
+          "E-Ticket",
+          style: GoogleFonts.poppins(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
       ),
+
       body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 30.0),
-          child: Column(
-            children: [
-              // KARTU TIKET UTAMA
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(24),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 20,
-                      offset: const Offset(0, 10),
-                    )
-                  ],
-                ),
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          children: [
+
+            /// SUCCESS ICON
+            Container(
+              width: 90,
+              height: 90,
+              decoration: BoxDecoration(
+                color: Colors.green.shade100,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.check_circle,
+                color: Colors.green,
+                size: 60,
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            Text(
+              "Booking Berhasil",
+              style: GoogleFonts.poppins(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+
+            const SizedBox(height: 6),
+
+            Text(
+              "Tunjukkan QR Code saat memasuki area parkir",
+              textAlign: TextAlign.center,
+              style: GoogleFonts.poppins(
+                color: Colors.grey,
+              ),
+            ),
+
+            const SizedBox(height: 25),
+
+            /// TICKET CARD
+            Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(25),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.08),
+                    blurRadius: 15,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
+              ),
+
+              child: Padding(
+                padding: const EdgeInsets.all(22),
                 child: Column(
                   children: [
-                    // BAGIAN ATAS TIKET
-                    Padding(
-                      padding: const EdgeInsets.all(24.0),
-                      child: Column(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: Colors.green.withOpacity(0.1),
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(Icons.check_circle_rounded, color: Colors.green, size: 48),
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            "Booking Berhasil!",
-                            style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.bold),
-                          ),
-                          Text(
-                            "Silakan scan kode di bawah saat tiba",
-                            style: GoogleFonts.poppins(color: Colors.grey, fontSize: 13),
-                          ),
-                        ],
-                      ),
+
+                    /// MALL
+                    _buildInfo(
+                      "Mall",
+                      mallName,
+                      Icons.location_city,
                     ),
 
-                    // GARIS PEMISAH (EFEK SOBEKAN TIKET)
-                    Row(
-                      children: [
-                        const SizedBox(width: -10, child: CircleAvatar(radius: 10, backgroundColor: Color(0xFFF0F4F8))),
-                        Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                            child: LayoutBuilder(
-                              builder: (context, constraints) {
-                                return Flex(
-                                  direction: Axis.horizontal,
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: List.generate(
-                                    (constraints.constrainWidth() / 10).floor(),
-                                    (index) => const SizedBox(width: 5, height: 1, child: DecoratedBox(decoration: BoxDecoration(color: Colors.grey))),
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: -10, child: CircleAvatar(radius: 10, backgroundColor: Color(0xFFF0F4F8))),
-                      ],
+                    const Divider(height: 30),
+
+                    /// SLOT
+                    _buildInfo(
+                      "Slot Parkir",
+                      slotNumber,
+                      Icons.local_parking,
                     ),
 
-                    // BAGIAN DETAIL INFO
-                    Padding(
-                      padding: const EdgeInsets.all(24.0),
-                      child: Column(
-                        children: [
-                          _buildTicketRow("Lokasi Mall", mallName),
-                          const SizedBox(height: 16),
-                          Row(
-                            children: [
-                              Expanded(child: _buildTicketRow("Slot Parkir", slotNumber)),
-                              Expanded(child: _buildTicketRow("ID Tiket", ticketId)),
-                            ],
-                          ),
-                          const SizedBox(height: 16),
-                          Row(
-                            children: [
-                              Expanded(child: _buildTicketRow("Tanggal", formattedDate)),
-                              Expanded(child: _buildTicketRow("Jam Masuk", formattedTime)),
-                            ],
-                          ),
-                          const SizedBox(height: 30),
+                    const Divider(height: 30),
 
-                          // QR CODE GENERATOR (MENGGUNAKAN DATA ASLI)
-                          Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              border: Border.all(color: Colors.grey[200]!),
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            child: QrImageView(
-                              data: "ID:$ticketId|Mall:$mallName|Slot:$slotNumber",
-                              version: QrVersions.auto,
-                              size: 180.0,
-                              gapless: false,
-                              embeddedImage: const NetworkImage('https://cdn-icons-png.flaticon.com/512/2991/2991201.png'), // Opsional: Logo parkir kecil di tengah QR
-                              embeddedImageStyle: const QrEmbeddedImageStyle(size: Size(30, 30)),
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            ticketId,
-                            style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey, letterSpacing: 2),
-                          ),
-                        ],
+                    /// TANGGAL
+                    _buildInfo(
+                      "Tanggal",
+                      date,
+                      Icons.calendar_month,
+                    ),
+
+                    const Divider(height: 30),
+
+                    /// JAM
+                    _buildInfo(
+                      "Jam Masuk",
+                      time,
+                      Icons.access_time,
+                    ),
+
+                    const Divider(height: 30),
+
+                    /// ID
+                    _buildInfo(
+                      "ID Tiket",
+                      ticketId,
+                      Icons.confirmation_number,
+                    ),
+
+                    const SizedBox(height: 25),
+
+                    QrImageView(
+                      data:
+                          "$ticketId-$mallName-$slotNumber",
+                      size: 220,
+                    ),
+
+                    const SizedBox(height: 15),
+
+                    Text(
+                      ticketId,
+                      style: GoogleFonts.poppins(
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 2,
                       ),
                     ),
                   ],
                 ),
               ),
+            ),
 
-              const SizedBox(height: 30),
+            const SizedBox(height: 30),
 
-              // TOMBOL AKSI
-              ElevatedButton.icon(
-                onPressed: () {
-                  Navigator.popUntil(context, (route) => route.isFirst);
-                },
-                icon: const Icon(Icons.home_rounded),
-                label: const Text("Selesai & Kembali"),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blueAccent,
-                  foregroundColor: Colors.white,
-                  minimumSize: const Size(double.infinity, 56),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  elevation: 0,
+            SizedBox(
+              width: double.infinity,
+              height: 55,
+              child: ElevatedButton.icon(
+                icon: const Icon(Icons.home),
+                label: const Text(
+                  "Kembali ke Beranda",
                 ),
-              ),
-              const SizedBox(height: 12),
-              TextButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor:
+                      const Color(0xFF2563EB),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius:
+                        BorderRadius.circular(16),
+                  ),
+                ),
                 onPressed: () {
-                  // Tambahkan fungsi download/share tiket jika perlu nanti
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Tiket telah disimpan di riwayat pesanan.")),
+                  Navigator.popUntil(
+                    context,
+                    (route) => route.isFirst,
                   );
                 },
-                child: Text(
-                  "Unduh Bukti Reservasi",
-                  style: GoogleFonts.poppins(color: Colors.blueAccent, fontWeight: FontWeight.w600),
-                ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildTicketRow(String label, String value) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildInfo(
+    String title,
+    String value,
+    IconData icon,
+  ) {
+    return Row(
       children: [
-        Text(label, style: GoogleFonts.poppins(color: Colors.grey, fontSize: 11)),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: GoogleFonts.poppins(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black87),
-          overflow: TextOverflow.ellipsis,
+        CircleAvatar(
+          backgroundColor:
+              const Color(0xFF2563EB).withOpacity(0.1),
+          child: Icon(
+            icon,
+            color: const Color(0xFF2563EB),
+          ),
+        ),
+
+        const SizedBox(width: 15),
+
+        Expanded(
+          child: Column(
+            crossAxisAlignment:
+                CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: GoogleFonts.poppins(
+                  fontSize: 12,
+                  color: Colors.grey,
+                ),
+              ),
+
+              Text(
+                value,
+                style: GoogleFonts.poppins(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 15,
+                ),
+              ),
+            ],
+          ),
         ),
       ],
     );

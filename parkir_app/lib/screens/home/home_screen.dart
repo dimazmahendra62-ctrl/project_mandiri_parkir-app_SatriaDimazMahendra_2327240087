@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import '../../services/database_service.dart';
+
 import '../../models/parking_slot_model.dart';
+import '../../services/database_service.dart';
+
+import '../booking/booking_screen.dart';
 import '../favorite/favorite_screen.dart';
 import '../profile/profile_screen.dart';
-import '../booking/booking_screen.dart'; // Mengarah ke ParkingDetailScreen
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -15,10 +17,10 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
 
-  final List<Widget> _screens = [
-    const ParkingMonitoringWidget(), 
-    const FavoriteScreen(),          
-    const ProfileScreen(),           
+  final List<Widget> _pages = const [
+    ParkingMonitoringWidget(),
+    FavoriteScreen(),
+    ProfileScreen(),
   ];
 
   @override
@@ -26,18 +28,31 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       body: IndexedStack(
         index: _currentIndex,
-        children: _screens,
+        children: _pages,
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
-        onTap: (index) => setState(() => _currentIndex = index),
-        selectedItemColor: Colors.blueAccent,
+        selectedItemColor: const Color(0xFF2563EB),
         unselectedItemColor: Colors.grey,
         type: BottomNavigationBarType.fixed,
+        onTap: (value) {
+          setState(() {
+            _currentIndex = value;
+          });
+        },
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.local_parking), label: 'Beranda'),
-          BottomNavigationBarItem(icon: Icon(Icons.star), label: 'Favorit'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profil'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home_rounded),
+            label: "Beranda",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.favorite_outline),
+            label: "Favorit",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person_outline),
+            label: "Profil",
+          ),
         ],
       ),
     );
@@ -48,191 +63,255 @@ class ParkingMonitoringWidget extends StatefulWidget {
   const ParkingMonitoringWidget({super.key});
 
   @override
-  State<ParkingMonitoringWidget> createState() => _ParkingMonitoringWidgetState();
+  State<ParkingMonitoringWidget> createState() =>
+      _ParkingMonitoringWidgetState();
 }
 
-class _ParkingMonitoringWidgetState extends State<ParkingMonitoringWidget> {
+class _ParkingMonitoringWidgetState
+    extends State<ParkingMonitoringWidget> {
   final DatabaseService _dbService = DatabaseService();
-  String _searchQuery = "";
+
+  String searchQuery = "";
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Cari Tempat Parkir", style: TextStyle(fontWeight: FontWeight.bold)),
-        elevation: 0,
+        title: const Text("Smart Parking"),
+        centerTitle: true,
       ),
       body: Column(
         children: [
-          // Kolom Pencarian Mall
+          // HEADER
+          Container(
+            width: double.infinity,
+            margin: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(24),
+              gradient: const LinearGradient(
+                colors: [
+                  Color(0xFF2563EB),
+                  Color(0xFF3B82F6),
+                ],
+              ),
+            ),
+            child: const Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Temukan Slot Parkir",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 6),
+                Text(
+                  "Pantau ketersediaan parkir secara real-time",
+                  style: TextStyle(
+                    color: Colors.white70,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // SEARCH
           Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
             child: TextField(
-              onChanged: (value) => setState(() => _searchQuery = value.toLowerCase()),
+              onChanged: (value) {
+                setState(() {
+                  searchQuery = value.toLowerCase();
+                });
+              },
               decoration: InputDecoration(
-                hintText: "Cari Mall (misal: PTC Mall)...",
-                prefixIcon: const Icon(Icons.search, color: Colors.blueAccent),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                hintText: "Cari mall...",
+                prefixIcon: const Icon(Icons.search),
                 filled: true,
-                fillColor: Colors.grey[100],
+                fillColor: Colors.grey.shade100,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide.none,
+                ),
               ),
             ),
           ),
-          
-          // List Mall dari Firestore (dengan Dummy Fallback)
+
+          const SizedBox(height: 16),
+
           Expanded(
             child: StreamBuilder<List<MallModel>>(
               stream: _dbService.streamMalls(),
               builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                if (snapshot.hasError) {
-                  return Center(child: Text("Error: ${snapshot.error}"));
-                }
-
-                // Ambil data dari Firestore, jika kosong pakai data dummy lokal untuk simulasi
                 List<MallModel> malls = snapshot.data ?? [];
-                
+
+                // Dummy data jika firestore kosong
                 if (malls.isEmpty) {
                   malls = [
                     MallModel(
-                      id: 'ptc_mall_dummy',
-                      name: 'PTC Mall',
-                      address: 'Jl. R. Sukamto No.8A, Palembang',
+                      id: "1",
+                      name: "PTC Mall",
+                      address: "Palembang",
                       totalSlots: 1000,
-                      availableSlots: 10, // 10/1000 = 0.01 (Memicu status "Hampir Penuh" berwarna merah)
+                      availableSlots: 120,
                     ),
                     MallModel(
-                      id: 'palembang_icon_dummy',
-                      name: 'Palembang Icon',
-                      address: 'Jl. POM IX, Palembang',
+                      id: "2",
+                      name: "Palembang Icon",
+                      address: "Palembang",
                       totalSlots: 800,
-                      availableSlots: 200, // 200/800 = 0.25 (Memicu status "Ramai" berwarna orange)
+                      availableSlots: 300,
                     ),
                     MallModel(
-                      id: 'palembang_indah_mall_dummy',
-                      name: 'Palembang Indah Mall',
-                      address: 'Jl. Letkol Iskandar No.18, Palembang',
+                      id: "3",
+                      name: "PIM",
+                      address: "Palembang",
                       totalSlots: 600,
-                      availableSlots: 450, // 450/600 = 0.75 (Memicu status "Tersedia" berwarna hijau)
+                      availableSlots: 50,
                     ),
                   ];
                 }
 
-                // Filter data berdasarkan input pencarian user secara realtime
-                final filteredMalls = malls.where((mall) {
-                  return mall.name.toLowerCase().contains(_searchQuery);
+                final filtered = malls.where((mall) {
+                  return mall.name
+                      .toLowerCase()
+                      .contains(searchQuery);
                 }).toList();
 
-                if (filteredMalls.isEmpty) {
+                if (filtered.isEmpty) {
                   return const Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(20.0),
-                      child: Text(
-                        "Mall tidak ditemukan atau data kosong.",
-                        style: TextStyle(color: Colors.grey, fontSize: 14),
-                      ),
+                    child: Text(
+                      "Mall tidak ditemukan",
                     ),
                   );
                 }
 
                 return ListView.builder(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
-                  itemCount: filteredMalls.length,
+                  itemCount: filtered.length,
                   itemBuilder: (context, index) {
-                    final mall = filteredMalls[index];
-                    
-                    // Logika Penghitungan Status Ketersediaan Sesuai Kriteria Persentase
-                    double ratio = mall.availableSlots / mall.totalSlots;
-                    String statusText = "Tersedia";
-                    Color statusColor = Colors.green;
+                    final mall = filtered[index];
+
+                    double ratio = mall.totalSlots > 0
+                        ? mall.availableSlots / mall.totalSlots
+                        : 0;
+
+                    Color statusColor;
+                    String statusText;
 
                     if (ratio <= 0.1) {
-                      statusText = "Hampir Penuh";
                       statusColor = Colors.red;
+                      statusText = "Hampir Penuh";
                     } else if (ratio <= 0.3) {
-                      statusText = "Ramai";
                       statusColor = Colors.orange;
+                      statusText = "Ramai";
+                    } else {
+                      statusColor = Colors.green;
+                      statusText = "Tersedia";
                     }
 
                     return Card(
                       margin: const EdgeInsets.only(bottom: 16),
                       elevation: 3,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
                       child: InkWell(
+                        borderRadius: BorderRadius.circular(20),
                         onTap: () {
-                          // Membuka Halaman Detail Grid Slot Parkir
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => ParkingDetailScreen(mall: mall),
+                              builder: (_) =>
+                                  ParkingDetailScreen(mall: mall),
                             ),
                           );
                         },
-                        borderRadius: BorderRadius.circular(16),
                         child: Padding(
-                          padding: const EdgeInsets.all(16.0),
+                          padding: const EdgeInsets.all(18),
                           child: Row(
                             children: [
-                              // Icon Gedung / Mall
                               Container(
-                                width: 60,
-                                height: 60,
+                                width: 70,
+                                height: 70,
                                 decoration: BoxDecoration(
-                                  color: Colors.blueAccent.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(12),
+                                  color: Colors.blue.shade50,
+                                  borderRadius:
+                                      BorderRadius.circular(16),
                                 ),
-                                child: const Icon(Icons.business, size: 35, color: Colors.blueAccent),
+                                child: const Icon(
+                                  Icons.local_parking,
+                                  color: Color(0xFF2563EB),
+                                  size: 36,
+                                ),
                               ),
+
                               const SizedBox(width: 16),
-                              
-                              // Detail Informasi Mall (Nama & Alamat)
+
                               Expanded(
                                 child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.start,
                                   children: [
                                     Text(
                                       mall.name,
-                                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                                      style: const TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
+
+                                    const SizedBox(height: 4),
+
                                     Text(
                                       mall.address,
-                                      style: const TextStyle(color: Colors.grey, fontSize: 12),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        color: Colors.grey.shade600,
+                                      ),
                                     ),
-                                    const SizedBox(height: 8),
-                                    
-                                    // Row Indikator Status & Angka Slot
+
+                                    const SizedBox(height: 12),
+
                                     Row(
                                       children: [
                                         Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                          padding:
+                                              const EdgeInsets.symmetric(
+                                            horizontal: 10,
+                                            vertical: 5,
+                                          ),
                                           decoration: BoxDecoration(
-                                            color: statusColor.withOpacity(0.1),
-                                            borderRadius: BorderRadius.circular(8),
+                                            color: statusColor
+                                                .withOpacity(0.15),
+                                            borderRadius:
+                                                BorderRadius.circular(20),
                                           ),
                                           child: Text(
                                             statusText,
                                             style: TextStyle(
-                                              color: statusColor, 
-                                              fontWeight: FontWeight.bold, 
-                                              fontSize: 11,
+                                              color: statusColor,
+                                              fontWeight:
+                                                  FontWeight.bold,
                                             ),
                                           ),
                                         ),
-                                        const SizedBox(width: 8),
+                                        const SizedBox(width: 10),
                                         Text(
                                           "${mall.availableSlots}/${mall.totalSlots} Slot",
-                                          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
                                         ),
                                       ],
                                     ),
                                   ],
                                 ),
                               ),
-                              const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+
+                              const Icon(
+                                Icons.arrow_forward_ios,
+                                size: 18,
+                              ),
                             ],
                           ),
                         ),

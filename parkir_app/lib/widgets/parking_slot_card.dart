@@ -13,36 +13,73 @@ class ParkingSlotCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      color: slot.isAvailable ? Colors.green[50] : Colors.red[50],
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+    final Color statusColor =
+        slot.isAvailable ? Colors.green : Colors.red;
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        decoration: BoxDecoration(
+          color: statusColor.withOpacity(0.08),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: statusColor.withOpacity(0.3),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: statusColor.withOpacity(0.1),
+              blurRadius: 12,
+              offset: const Offset(0, 5),
+            ),
+          ],
+        ),
         child: Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.all(12),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
-                slot.isAvailable ? Icons.local_parking : Icons.directions_car,
-                color: slot.isAvailable ? Colors.green : Colors.red,
-                size: 28,
+                slot.isAvailable
+                    ? Icons.local_parking_rounded
+                    : Icons.directions_car,
+                color: statusColor,
+                size: 40,
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 8),
               Text(
                 slot.slotName,
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
-                  fontSize: 14,
                 ),
               ),
+              const SizedBox(height: 5),
               Text(
                 slot.floor,
-                style: TextStyle(
-                  color: Colors.grey[700],
-                  fontSize: 10,
+                style: const TextStyle(
+                  color: Colors.grey,
+                  fontSize: 11,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: statusColor,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  slot.isAvailable
+                      ? "TERSEDIA"
+                      : "TERISI",
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],
